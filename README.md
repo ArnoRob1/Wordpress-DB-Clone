@@ -8,7 +8,7 @@ Alias : in ~/.bash_profile, add alias clone="shjs wpdbclone.js" for simplified c
 secrets.json
 
 {
-	"srdbpath": "~/path/to/srdb.cli.php",
+	"srdb_path": "~/path/to/srdb.cli.php",
 	"servers": {
 
 		"dev": {
