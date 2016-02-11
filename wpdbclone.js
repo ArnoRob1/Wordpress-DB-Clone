@@ -15,7 +15,13 @@ var shell   = require( 'shelljs' );
 var configs = require( './secrets.json' );
 
 /* Tunels a command through SSH */
-function sshy(command, server) { return ("ssh " + server.ftp_user + "@" + server.ftp_host + " '" + command + "'"); }
+function sshy(command, server) { 
+	if(server.use_ssh)
+		return ("ssh " + server.ftp_user + "@" + server.ftp_host + " '" + command + "'");
+	else 
+		return command;
+}
+
 /* Writes a message */
 function echo(message) { shell.echo(message + "\n"); }
 /* Writes a red message */
@@ -37,7 +43,7 @@ if(from_arg == undefined || to_arg == undefined) {
 	} else {
 
 		var from_server = configs.servers[from_arg];
-		var to_server         = configs.servers[to_arg];
+		var to_server   = configs.servers[to_arg];
 
 		/* Dump and zip a DB */
 		var dump  = "mysqldump --user=" + from_server.db_user + " --password=" + from_server.db_pass + " --host=" + from_server.db_host + " " + from_server.db_name + " | gzip -9"; 
@@ -45,18 +51,10 @@ if(from_arg == undefined || to_arg == undefined) {
 		/* Unzip and load a DB */
 		var load = "gzip -d | mysql --user=" + to_server.db_user + " --password=" + to_server.db_pass + " --host=" + to_server.db_host + " " + to_server.db_name;
 
-		if(from_server != configs.servers.local) dump = sshy(dump, from_server);
-		if(to_server   != configs.servers.local) load = sshy(load, to_server);
+		dump = sshy(dump, from_server);
+		load = sshy(load, to_server);
 
 		var transfer_db  = dump + " | " + load;
-
-		var searchhost = (to_server.db_host == "localhost") ? "127.0.0.1" : to_server.db_host; /* Localhost is not working with Search&Replace DB Master - replace with 127.0.0.1 */
-
-		var php = (to_server==configs.servers.local)?'php':'php.ORIG.5_3'; /* On OVH Mutualised servers, CLI PHP version is 4.9, 5.* required */
-
-		var search = php + " " + configs.srdb_path + " -h " + searchhost + " -u " + to_server.db_user + " -p " + to_server.db_pass + " -n " + to_server.db_name + " -s '" + from_server.url + "' -r '" + to_server.url + "'";
-
-		if(to_server != configs.servers.local) search = sshy(search, to_server);
 
 		shell.echo("");
 		
@@ -66,7 +64,10 @@ if(from_arg == undefined || to_arg == undefined) {
 
 			echo("Database has been transfered.");
 
-			if(to_server.srdb) {
+			if(to_server.use_srdb) {
+				var searchhost = (to_server.db_host == "localhost") ? "127.0.0.1" : to_server.db_host; /* Localhost is not working with Search&Replace DB Master - replace with 127.0.0.1 */
+				var search = "php" + to_server.php_opt + " " + configs.srdb_path + " -h " + searchhost + " -u " + to_server.db_user + " -p " + to_server.db_pass + " -n " + to_server.db_name + " -s '" + from_server.url + "' -r '" + to_server.url + "'";
+				search = sshy(search, to_server);
 				echo("Replacing " + from_server.url + " by " + to_server.url);
 				shell.exec(search);
 				shell.echo("");
