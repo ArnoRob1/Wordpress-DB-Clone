@@ -1,40 +1,33 @@
-# wpdbclone
-Wordpress MySQL DB clone utility
+# WPDBCLONE
+wpdbclone.js is a Wordpress MySQL Database clone utility
+  - Copy the whole database from one server to another
+  - Performs a search and replace for WP site url replacement
 
-Usage : "shjs wpdbclone.js dev to local"
+wpdbclone.js uses :
+* [Search&ReplaceDBMaster] - A database search and replace script in php
+* [shelljs] - Portable Unix shell commands for Node.js
 
-Alias : in ~/.bash_profile, add alias clone="shjs wpdbclone.js" for simplified command "clone dev to local"
+### Installation
+You need shelljs installed globally:
+```sh
+$ npm i -g shelljs
+```
+[Search&ReplaceDBMaster] has to be installed on every server. The path to srdb.cli.php has to be defined in secrets.config. 
 
-secrets.json
 
-{
-	"srdb_path": "~/path/to/srdb.cli.php",
-	"servers": {
+### Usage
+```sh
+$ shjs wpdbclone.js dev to local
+```
 
-		"dev": {
-			"ftp_host": "",
-			"ftp_user": "",
-			"ftp_pass": "",
-			"db_host" : "",
-			"db_name" : "",
-			"db_user" : "",
-			"db_pass" : "",
-			"url"     : "sofeir.crea-rennes2.fr",
-			"srdb"	  : true
+### Alias
+in ~/.bash_profile, add alias clone="shjs wpdbclone.js" for simplified command "clone dev to local"
 
-			},
+### Todos
+ - Add srdbpath per server in secrets.json
+ - enable prefix tables export only (currently the whole DB is exported)
 
-			"local": {
-				"path"    : "",
-				"ftp_host": "",
-				"ftp_user": "",
-				"ftp_pass": "",
-				"db_host" : "",
-				"db_name" : "",
-				"db_user" : "",
-				"db_pass" : "",
-				"url"     : "",
-				"srdb"	  : true
-			}
-		}
-	}
+
+   [shelljs]: <https://www.npmjs.com/package/shelljs>
+   [Search&ReplaceDBMaster]: <https://interconnectit.com/products/search-and-replace-for-wordpress-databases/>
+   [node.js]: <https://nodejs.org/en/>
